@@ -39,7 +39,7 @@
     font-family: 'Noto Sans JP', system-ui, -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
     font-weight: 400;
     min-height: 100vh;
-    padding: 30px 18px 80px;
+    padding: 30px 18px 104px;
     -webkit-text-size-adjust: 100%;
     overflow-x: hidden;
     line-height: 1.7;
@@ -197,6 +197,28 @@
     border-radius: 8px; transition: all .18s ease;
   }
   .rangebar button.active { background: #fff; color: var(--blue-strong); box-shadow: 0 1px 4px rgba(47,119,196,0.14); }
+  .chart-modes { display: inline-flex; margin-bottom: 12px; }
+
+  /* 月間ヒートマップ */
+  .heat-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .heat-head h2 { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .heat-nav {
+    background: none; border: 1px solid var(--line); border-radius: 9px; width: 34px; height: 34px;
+    cursor: pointer; color: var(--ink-soft); font-size: 18px; line-height: 1; transition: all .18s ease;
+  }
+  .heat-nav:hover:not(:disabled) { border-color: var(--blue-soft); color: var(--blue-strong); }
+  .heat-nav:disabled { opacity: 0.35; cursor: default; }
+  .heat-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px; }
+  .heat-weekdays span { text-align: center; font-size: 11px; font-weight: 500; color: var(--ink-faint); }
+  .heat-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .heat-cell {
+    aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
+    border-radius: 9px; font-size: 12px; color: var(--ink-faint);
+  }
+  .heat-cell.empty { visibility: hidden; }
+  .heat-cell.lv1 { background: #cfe2f6; color: var(--ink); }
+  .heat-cell.lv2 { background: #8fbdec; color: #fff; }
+  .heat-cell.lv3 { background: #3f83cf; color: #fff; font-weight: 700; }
 
   .legend { display: flex; gap: 18px; margin-bottom: 8px; padding-left: 4px; }
   .legend .item { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--ink-soft); }
@@ -220,13 +242,33 @@
   footer { text-align: center; margin-top: 26px; font-size: 12px; color: var(--ink-faint); line-height: 1.9; }
 
   .toast {
-    position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px);
+    position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(20px);
     background: #fff; border: 1px solid var(--blue-soft); color: var(--blue-strong);
     font-size: 14px; font-weight: 500; padding: 12px 22px; border-radius: 12px;
     opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
     z-index: 50; box-shadow: 0 12px 34px rgba(47,119,196,0.22);
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast .badge-title { font-weight: 700; }
+
+  /* SNS固定バー */
+  .sns-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+  }
+  .sns {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    height: 44px; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700;
+    text-decoration: none; letter-spacing: 0.02em;
+  }
+  .sns:active { filter: brightness(0.93); }
+  .sns.line { background: #06c755; }
+  .sns.ig { background: linear-gradient(45deg, #feda75, #d62976 55%, #4f5bd5); }
+  .sns.msg { background: #0084ff; }
+  .sns.x { background: #000; }
+  @media (max-width: 400px) { .sns { font-size: 12px; } }
 </style>
 </head>
 <body>
@@ -283,18 +325,33 @@
   <!-- グラフ -->
   <div class="panel">
     <div class="chart-head">
-      <h2>1日ごとの回数</h2>
+      <h2 id="chartTitle">1日ごとの回数</h2>
       <div class="rangebar" id="rangeBar">
         <button type="button" data-days="7">7日</button>
         <button type="button" data-days="14" class="active">14日</button>
         <button type="button" data-days="30">30日</button>
       </div>
     </div>
+    <div class="rangebar chart-modes" id="modeBar">
+      <button type="button" data-mode="daily" class="active">日別</button>
+      <button type="button" data-mode="cumulative">累計</button>
+    </div>
     <div class="legend">
       <div class="item reply"><span class="ldot"></span>返信できた</div>
       <div class="item resist"><span class="ldot"></span>欲求を我慢</div>
     </div>
     <div id="chartArea"></div>
+  </div>
+
+  <!-- 月間ヒートマップ（積み上げの歴史） -->
+  <div class="panel">
+    <div class="heat-head">
+      <button type="button" class="heat-nav" id="heatPrev" aria-label="前の月">‹</button>
+      <h2 id="heatTitle">　</h2>
+      <button type="button" class="heat-nav" id="heatNext" aria-label="次の月">›</button>
+    </div>
+    <div class="heat-weekdays"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+    <div class="heat-grid" id="heatGrid"></div>
   </div>
 
   <div class="tools">
@@ -309,6 +366,13 @@
   </footer>
 </div>
 
+<nav class="sns-bar" aria-label="メッセージアプリを開く">
+  <a class="sns line" href="https://line.me/R/" target="_blank" rel="noopener">LINE</a>
+  <a class="sns ig" href="https://www.instagram.com/direct/inbox/" target="_blank" rel="noopener">Instagram</a>
+  <a class="sns msg" href="https://www.messenger.com/" target="_blank" rel="noopener">Messenger</a>
+  <a class="sns x" href="https://x.com/messages" target="_blank" rel="noopener">X</a>
+</nav>
+
 <div class="toast" id="toast"></div>
 <input type="file" id="fileInput" accept="application/json" style="display:none">
 
@@ -320,8 +384,11 @@
   var MAX_HISTORY = 400;
   var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+  var TOTAL_DAY_MILESTONES = [10, 30, 50, 100];
+
   var state = load();
   var rangeDays = 14;
+  var chartMode = "daily";        // "daily" | "cumulative"
   var doneCollapsed = true;
 
   function todayKey(d) {
@@ -335,13 +402,57 @@
   function emptyMetric() { return { total: 0, daily: {}, log: [] }; }
   function normMetric(m) { m = m || {}; return { total: m.total || 0, daily: m.daily || {}, log: m.log || [] }; }
 
+  function normBadges(b) {
+    b = b || {};
+    var s = b.secret || {}, ok = s.okaeri || {}, en = s.encore || {}, td = s.totalDays || {};
+    return {
+      earnedMilestones: Array.isArray(b.earnedMilestones) ? b.earnedMilestones.slice() : [],
+      secret: {
+        okaeri: { count: ok.count || 0, lastEarnedDate: ok.lastEarnedDate || null },
+        encore: { earnedDates: Array.isArray(en.earnedDates) ? en.earnedDates.slice() : [] },
+        totalDays: { earned: Array.isArray(td.earned) ? td.earned.slice() : [] }
+      }
+    };
+  }
+
+  function normalizeState(s) {
+    s = s || {};
+    return {
+      reply: normMetric(s.reply),
+      resist: normMetric(s.resist),
+      tasks: Array.isArray(s.tasks) ? s.tasks : [],
+      badges: normBadges(s.badges),
+      activityDates: Array.isArray(s.activityDates) ? s.activityDates.slice() : [],
+      lastReplyDate: s.lastReplyDate || null
+    };
+  }
+
+  // 閾値生成（配列ハードコードしない）: 50以下は [1,5,10,25,50]、以降は 75+25n
+  function milestoneThresholdsUpTo(total) {
+    var base = [1, 5, 10, 25, 50], out = [];
+    for (var i = 0; i < base.length; i++) if (base[i] <= total) out.push(base[i]);
+    for (var v = 75; v <= total; v += 25) out.push(v);
+    return out;
+  }
+
+  // バッジ導入前のデータを移行。履歴から沈黙のうちに補完し、過去分の通知連発を防ぐ
+  function backfillBadges(st) {
+    var days = Object.keys(st.reply.daily).sort();
+    st.activityDates = days;
+    st.lastReplyDate = days.length ? days[days.length - 1] : null;
+    st.badges.earnedMilestones = milestoneThresholdsUpTo(st.reply.total);
+    st.badges.secret.totalDays.earned = TOTAL_DAY_MILESTONES.filter(function (d) { return days.length >= d; });
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(KEY);
       if (raw) {
         var s = JSON.parse(raw);
         if (s && s.reply && s.resist) {
-          return { reply: normMetric(s.reply), resist: normMetric(s.resist), tasks: Array.isArray(s.tasks) ? s.tasks : [] };
+          var st = normalizeState(s);
+          if (!s.badges) backfillBadges(st);   // 既存ユーザーのバッジ初期化（無音）
+          return st;
         }
       }
     } catch (e) {}
@@ -350,10 +461,14 @@
       var old = localStorage.getItem("reply_tracker_v1") || localStorage.getItem("soulound_reply_tracker_v1");
       if (old) {
         var o = JSON.parse(old);
-        if (o && typeof o === "object") return { reply: normMetric(o), resist: emptyMetric(), tasks: [] };
+        if (o && typeof o === "object") {
+          var st1 = normalizeState({ reply: o });
+          backfillBadges(st1);
+          return st1;
+        }
       }
     } catch (e) {}
-    return { reply: emptyMetric(), resist: emptyMetric(), tasks: [] };
+    return normalizeState({});
   }
 
   function save() {
@@ -382,6 +497,83 @@
     return true;
   }
 
+  // ---- バッジ：マイルストーン（累計返信回数） ----
+  // 色は仕様の各ティア系統。白背景でも読めるトーンに調整
+  var TIERS = {
+    bronze:   { key: "bronze",   color: "#b87333" },  // 銅
+    silver:   { key: "silver",   color: "#8f9095" },  // 銀
+    gold:     { key: "gold",     color: "#bd9412" },  // 金
+    platinum: { key: "platinum", color: "#5f7fa6" }   // プラチナ（青白い光沢系）
+  };
+  function tierOfThreshold(t) {
+    if (t <= 10) return TIERS.bronze;    // 1〜10
+    if (t <= 75) return TIERS.silver;    // 25〜75
+    if (t <= 200) return TIERS.gold;     // 100〜200
+    return TIERS.platinum;               // 225以上
+  }
+  // 累計値で新規到達したマイルストーンを付与する。取り消しで累計が下回っても剥奪しない
+  function earnMilestones() {
+    var earned = state.badges.earnedMilestones, out = [];
+    var reached = milestoneThresholdsUpTo(state.reply.total);
+    for (var i = 0; i < reached.length; i++) {
+      var t = reached[i];
+      if (earned.indexOf(t) === -1) {
+        earned.push(t);
+        out.push({ name: "返信" + t + "回", color: tierOfThreshold(t).color });
+      }
+    }
+    return out;
+  }
+  // ---- シークレットバッジ（連続日数は使わない） ----
+  var SECRET_COLOR = "#2f9e57";  // 緑系
+  function dateDiffDays(fromKey, toKey) {
+    function toDate(k) { var a = k.split("-"); return new Date(+a[0], +a[1] - 1, +a[2]); }
+    return Math.round((toDate(toKey) - toDate(fromKey)) / 86400000);
+  }
+  function earnSecretBadges(dayKey) {
+    var out = [], sec = state.badges.secret;
+    // おかえり：最後の返信から3日以上空いた後の1回（何度でも）。lastReplyDate更新の前に判定
+    if (state.lastReplyDate && dateDiffDays(state.lastReplyDate, dayKey) >= 3) {
+      sec.okaeri.count += 1;
+      sec.okaeri.lastEarnedDate = dayKey;
+      out.push({ name: "おかえり", color: SECRET_COLOR });
+    }
+    // アンコール：同じ日に2回以上（その日1回だけ付与）
+    if ((state.reply.daily[dayKey] || 0) >= 2 && sec.encore.earnedDates.indexOf(dayKey) === -1) {
+      sec.encore.earnedDates.push(dayKey);
+      out.push({ name: "アンコール", color: SECRET_COLOR });
+    }
+    // 通算日数：返信した日の通算（連続不問・絶対に減らない）
+    if (state.activityDates.indexOf(dayKey) === -1) {
+      state.activityDates.push(dayKey);
+      state.activityDates.sort();
+    }
+    var totalDays = state.activityDates.length;
+    for (var i = 0; i < TOTAL_DAY_MILESTONES.length; i++) {
+      var d = TOTAL_DAY_MILESTONES[i];
+      if (totalDays >= d && sec.totalDays.earned.indexOf(d) === -1) {
+        sec.totalDays.earned.push(d);
+        out.push({ name: "通算" + d + "日", color: SECRET_COLOR });
+      }
+    }
+    // lastReplyDate を最新に更新
+    if (!state.lastReplyDate || dayKey > state.lastReplyDate) state.lastReplyDate = dayKey;
+    return out;
+  }
+  // 返信+1時に付与すべきバッジを集める（マイルストーン＋シークレット）
+  function collectReplyBadges(dayKey) {
+    return earnMilestones().concat(earnSecretBadges(dayKey));
+  }
+  // バッジ獲得通知：既存トーストの仕組みに乗せ、タイトルをティア色で表示。複数は順番に
+  function announceBadges(list) {
+    for (var i = 0; i < list.length; i++) {
+      var bd = list[i];
+      msgQueue.push('🏅 <span class="badge-title" style="color:' + bd.color + '">' +
+        escapeHtml(bd.name) + '</span>のバッジを獲得しました！');
+    }
+    pumpMsg();
+  }
+
   // ---- タスク ----
   function addTask(text) {
     text = (text || "").trim();
@@ -396,9 +588,11 @@
     t.done = true;
     t.doneAt = todayKey();
     addOne("reply", t.doneAt);   // 相乗：返信回数も+1
+    var newBadges = collectReplyBadges(t.doneAt);
     save();
     popReply();
     toast("返信できた！ ＋1");
+    announceBadges(newBadges);
   }
 
   function reopenTask(id) {
@@ -440,6 +634,19 @@
     return arr;
   }
 
+  // 累計（絶対に下がらない線）。窓の開始より前の分をベースラインに足して積み上げる
+  function lastNDaysCumulative(n) {
+    var data = lastNDays(n);
+    var start = data[0].key, baseR = 0, baseG = 0, k;
+    for (k in state.reply.daily) if (k < start) baseR += state.reply.daily[k];
+    for (k in state.resist.daily) if (k < start) baseG += state.resist.daily[k];
+    var cr = baseR, cg = baseG;
+    return data.map(function (d) {
+      cr += d.reply; cg += d.resist;
+      return { key: d.key, date: d.date, reply: cr, resist: cg };
+    });
+  }
+
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -455,6 +662,7 @@
   var resistUndo = document.getElementById("resistUndo");
   var heroSub = document.getElementById("heroSub");
   var chartArea = document.getElementById("chartArea");
+  var chartTitle = document.getElementById("chartTitle");
   var taskCount = document.getElementById("taskCount");
   var pendingList = document.getElementById("pendingList");
   var doneList = document.getElementById("doneList");
@@ -554,7 +762,9 @@
   }
 
   function renderChart() {
-    var data = lastNDays(rangeDays);
+    var cumulative = chartMode === "cumulative";
+    if (chartTitle) chartTitle.textContent = cumulative ? "累計の回数" : "1日ごとの回数";
+    var data = cumulative ? lastNDaysCumulative(rangeDays) : lastNDays(rangeDays);
     if (state.reply.total === 0 && state.resist.total === 0) {
       chartArea.innerHTML = '<div class="empty-note">まだ記録がありません。<br>ボタンやタスク完了で、ここに折れ線が描かれていきます。</div>';
       return;
@@ -589,7 +799,53 @@
     chartArea.innerHTML = svg;
   }
 
-  function renderAll() { renderStats(); renderTasks(); renderChart(); }
+  // ---- 月間ヒートマップ ----
+  var heatGrid = document.getElementById("heatGrid");
+  var heatTitle = document.getElementById("heatTitle");
+  var heatPrevBtn = document.getElementById("heatPrev");
+  var heatNextBtn = document.getElementById("heatNext");
+  var heatMonth = new Date();
+  heatMonth = new Date(heatMonth.getFullYear(), heatMonth.getMonth(), 1);
+
+  function heatLevel(c) { return c >= 5 ? 3 : c >= 3 ? 2 : 1; }
+
+  function renderHeatmap() {
+    var y = heatMonth.getFullYear(), m = heatMonth.getMonth();
+    heatTitle.textContent = y + "年" + (m + 1) + "月";
+
+    var firstDow = new Date(y, m, 1).getDay();        // 0=日
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var html = "";
+    for (var i = 0; i < firstDow; i++) html += '<div class="heat-cell empty"></div>';
+    for (var day = 1; day <= daysInMonth; day++) {
+      var key = todayKey(new Date(y, m, day));
+      var c = state.reply.daily[key] || 0;
+      // 空白の日はただの空白（色・0・強調はしない）。数字だけ淡く出す
+      if (c > 0) {
+        html += '<div class="heat-cell lv' + heatLevel(c) + '" title="' + key + '｜返信 ' + c + '回"><span>' + day + '</span></div>';
+      } else {
+        html += '<div class="heat-cell"><span>' + day + '</span></div>';
+      }
+    }
+    heatGrid.innerHTML = html;
+
+    // 次の月は「今月」を上限に（未来の空カレンダーは出さない）
+    var now = new Date();
+    var curFirst = new Date(now.getFullYear(), now.getMonth(), 1);
+    heatNextBtn.disabled = heatMonth >= curFirst;
+  }
+
+  heatPrevBtn.addEventListener("click", function () {
+    heatMonth = new Date(heatMonth.getFullYear(), heatMonth.getMonth() - 1, 1);
+    renderHeatmap();
+  });
+  heatNextBtn.addEventListener("click", function () {
+    var now = new Date(), curFirst = new Date(now.getFullYear(), now.getMonth(), 1);
+    var next = new Date(heatMonth.getFullYear(), heatMonth.getMonth() + 1, 1);
+    if (next <= curFirst) { heatMonth = next; renderHeatmap(); }
+  });
+
+  function renderAll() { renderStats(); renderTasks(); renderChart(); renderHeatmap(); }
 
   // ---- インタラクション ----
   function wire(metric, btnId, floatId, undoId) {
@@ -597,11 +853,14 @@
     var flt = document.getElementById(floatId);
     var num = document.getElementById(metric + "Total");
     btn.addEventListener("click", function () {
-      addOne(metric); save(); renderAll();
+      addOne(metric);
+      var newBadges = metric === "reply" ? collectReplyBadges(todayKey()) : [];
+      save(); renderAll();
       num.classList.remove("pop"); void num.offsetWidth; num.classList.add("pop");
       btn.classList.remove("flash"); void btn.offsetWidth; btn.classList.add("flash");
       flt.classList.remove("go"); void flt.offsetWidth; flt.classList.add("go");
       if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+      announceBadges(newBadges);
     });
     document.getElementById(undoId).addEventListener("click", function () {
       if (decOne(metric)) { save(); renderAll(); toast("直前の1回を取り消しました"); }
@@ -657,6 +916,15 @@
     renderChart();
   });
 
+  document.getElementById("modeBar").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    chartMode = b.getAttribute("data-mode");
+    [].forEach.call(this.querySelectorAll("button"), function (x) { x.classList.remove("active"); });
+    b.classList.add("active");
+    renderChart();
+  });
+
   document.getElementById("exportBtn").addEventListener("click", function () {
     var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     var url = URL.createObjectURL(blob);
@@ -676,9 +944,11 @@
       try {
         var s = JSON.parse(reader.result);
         if (s && s.reply && s.resist) {
-          state = { reply: normMetric(s.reply), resist: normMetric(s.resist), tasks: Array.isArray(s.tasks) ? s.tasks : [] };
+          state = normalizeState(s);
+          if (!s.badges) backfillBadges(state);
         } else if (s && typeof s.daily === "object") {
-          state = { reply: normMetric(s), resist: emptyMetric(), tasks: [] };
+          state = normalizeState({ reply: s });
+          backfillBadges(state);
         } else throw new Error("bad");
         save(); renderAll(); toast("データを読み込みました");
       } catch (e) { toast("読み込めませんでした（形式が不正です）"); }
@@ -688,19 +958,24 @@
   });
 
   document.getElementById("resetBtn").addEventListener("click", function () {
-    if (!confirm("すべての記録（カウント・タスク）を消去します。よろしいですか？\n（先に「データを書き出す」でバックアップできます）")) return;
-    state = { reply: emptyMetric(), resist: emptyMetric(), tasks: [] };
+    if (!confirm("すべての記録（カウント・タスク・バッジ）を消去します。よろしいですか？\n（先に「データを書き出す」でバックアップできます）")) return;
+    state = normalizeState({});
     save(); renderAll(); toast("記録をリセットしました");
   });
 
   var toastEl = document.getElementById("toast");
-  var toastTimer = null;
-  function toast(msg) {
-    toastEl.textContent = msg;
+  var msgQueue = [], msgActive = false;
+  function pumpMsg() {
+    if (msgActive || !msgQueue.length) return;
+    msgActive = true;
+    toastEl.innerHTML = msgQueue.shift();
     toastEl.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+    setTimeout(function () {
+      toastEl.classList.remove("show");
+      setTimeout(function () { msgActive = false; pumpMsg(); }, 260);
+    }, 2000);
   }
+  function toast(msg) { msgQueue.push(escapeHtml(msg)); pumpMsg(); }
 
   window.addEventListener("storage", function (e) { if (e.key === KEY) { state = load(); renderAll(); } });
   document.addEventListener("visibilitychange", function () { if (!document.hidden) renderAll(); });
