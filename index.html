@@ -39,7 +39,8 @@
     font-family: 'Noto Sans JP', system-ui, -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
     font-weight: 400;
     min-height: 100vh;
-    padding: 30px 18px 104px;
+    padding: 30px 18px 0;
+    padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     -webkit-text-size-adjust: 100%;
     overflow-x: hidden;
     line-height: 1.7;
@@ -124,6 +125,41 @@
   }
   .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .panel-head h2 { font-size: 15px; font-weight: 700; color: var(--ink); }
+
+  /* 獲得したバッジ */
+  .badges-head { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+  .badges-head h2 { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .badge-num { color: var(--ink-faint); font-weight: 500; font-size: 13px; margin-left: 4px; }
+  .badges-head .caret { color: var(--ink-faint); transition: transform .2s ease; }
+  .badges-head.collapsed .caret { transform: rotate(-90deg); }
+  #badgesBody.collapsed { display: none; }
+  .badge-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .badge-chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px;
+    border-radius: 999px; font-size: 13px; font-weight: 700; color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .badge-empty { margin-top: 14px; color: var(--ink-faint); font-size: 13px; }
+
+  /* 過去の記録を修正 */
+  #editBody.collapsed { display: none; }
+  .edit-note { margin: 14px 0 12px; font-size: 12px; color: var(--ink-soft); line-height: 1.7; }
+  .edit-date {
+    width: 100%; border: 1px solid var(--line); border-radius: 11px; padding: 10px 12px;
+    font-size: 15px; color: var(--ink); background: #fbfdff; margin-bottom: 14px;
+  }
+  .edit-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .edit-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--ink); }
+  .edit-label .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .edit-label .reply-dot { background: var(--blue); }
+  .edit-label .resist-dot { background: var(--teal); }
+  .stepper { display: flex; align-items: center; gap: 14px; }
+  .stepper button {
+    width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: #fff;
+    font-size: 20px; line-height: 1; color: var(--blue-strong); cursor: pointer; transition: all .15s ease;
+  }
+  .stepper button:hover { border-color: var(--blue-soft); background: var(--blue-bg); }
+  .stepper b { min-width: 26px; text-align: center; font-size: 17px; font-variant-numeric: tabular-nums; }
 
   /* タスク */
   .task-count { font-size: 12px; font-weight: 500; color: var(--ink-faint); }
@@ -216,9 +252,9 @@
     border-radius: 9px; font-size: 12px; color: var(--ink-faint);
   }
   .heat-cell.empty { visibility: hidden; }
-  .heat-cell.lv1 { background: #cfe2f6; color: var(--ink); }
-  .heat-cell.lv2 { background: #8fbdec; color: #fff; }
-  .heat-cell.lv3 { background: #3f83cf; color: #fff; font-weight: 700; }
+  .heat-cell.lv1 { background: #ffe7b3; color: var(--ink); }
+  .heat-cell.lv2 { background: #ffc65c; color: #5a4410; }
+  .heat-cell.lv3 { background: #f0a020; color: #fff; font-weight: 700; }
 
   .legend { display: flex; gap: 18px; margin-bottom: 8px; padding-left: 4px; }
   .legend .item { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--ink-soft); }
@@ -242,7 +278,7 @@
   footer { text-align: center; margin-top: 26px; font-size: 12px; color: var(--ink-faint); line-height: 1.9; }
 
   .toast {
-    position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(20px);
+    position: fixed; left: 50%; bottom: calc(120px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px);
     background: #fff; border: 1px solid var(--blue-soft); color: var(--blue-strong);
     font-size: 14px; font-weight: 500; padding: 12px 22px; border-radius: 12px;
     opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
@@ -254,13 +290,16 @@
   /* SNS固定バー */
   .sns-bar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-    background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; flex-direction: column; gap: 7px;
+    padding: 9px 12px calc(12px + env(safe-area-inset-bottom, 18px));
+    background: rgba(255,255,255,0.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid var(--line);
   }
+  .sns-label { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-soft); }
+  .sns-row { display: flex; gap: 8px; }
   .sns {
     flex: 1; display: flex; align-items: center; justify-content: center;
-    height: 44px; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700;
+    height: 48px; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700;
     text-decoration: none; letter-spacing: 0.02em;
   }
   .sns:active { filter: brightness(0.93); }
@@ -297,6 +336,18 @@
       <button type="button" class="act-btn" id="resistBtn"><span class="ico">✦</span>我慢できた</button>
       <div class="float1" id="resistFloat">+1</div>
       <div><button type="button" class="undo" id="resistUndo" disabled>取り消す</button></div>
+    </div>
+  </div>
+
+  <!-- 獲得したバッジ -->
+  <div class="panel">
+    <div class="badges-head" id="badgesToggle">
+      <h2>🏅 獲得したバッジ <span class="badge-num" id="badgeNum">0</span></h2>
+      <span class="caret">▾</span>
+    </div>
+    <div id="badgesBody">
+      <div class="badge-grid" id="badgeGrid"></div>
+      <div class="badge-empty" id="badgeEmpty">まだバッジはありません。「返信できた」で最初のひとつを。</div>
     </div>
   </div>
 
@@ -354,6 +405,34 @@
     <div class="heat-grid" id="heatGrid"></div>
   </div>
 
+  <!-- 過去の記録を修正（日をまたいだ時の付け替え用） -->
+  <div class="panel">
+    <div class="badges-head" id="editToggle">
+      <h2>過去の記録を修正</h2>
+      <span class="caret">▾</span>
+    </div>
+    <div id="editBody" class="collapsed">
+      <p class="edit-note">入力中に日付をまたいでしまった時などに、指定した日の回数を直せます。</p>
+      <input type="date" id="editDate" class="edit-date">
+      <div class="edit-row">
+        <span class="edit-label"><span class="dot reply-dot"></span>返信できた</span>
+        <div class="stepper">
+          <button type="button" data-metric="reply" data-delta="-1">−</button>
+          <b id="editReplyVal">0</b>
+          <button type="button" data-metric="reply" data-delta="1">＋</button>
+        </div>
+      </div>
+      <div class="edit-row">
+        <span class="edit-label"><span class="dot resist-dot"></span>欲求を我慢</span>
+        <div class="stepper">
+          <button type="button" data-metric="resist" data-delta="-1">−</button>
+          <b id="editResistVal">0</b>
+          <button type="button" data-metric="resist" data-delta="1">＋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="tools">
     <button type="button" id="exportBtn">データを書き出す</button>
     <button type="button" id="importBtn">読み込む</button>
@@ -366,11 +445,14 @@
   </footer>
 </div>
 
-<nav class="sns-bar" aria-label="メッセージアプリを開く">
-  <a class="sns line" href="https://line.me/R/" target="_blank" rel="noopener">LINE</a>
-  <a class="sns ig" href="https://www.instagram.com/direct/inbox/" target="_blank" rel="noopener">Instagram</a>
-  <a class="sns msg" href="https://www.messenger.com/" target="_blank" rel="noopener">Messenger</a>
-  <a class="sns x" href="https://x.com/messages" target="_blank" rel="noopener">X</a>
+<nav class="sns-bar" aria-label="返信しに行く">
+  <div class="sns-label">返信しに行く</div>
+  <div class="sns-row">
+    <a class="sns line" href="https://line.me/R/" target="_blank" rel="noopener">LINE</a>
+    <a class="sns ig" href="https://www.instagram.com/direct/inbox/" target="_blank" rel="noopener">Instagram</a>
+    <a class="sns msg" id="snsMsg" href="https://www.messenger.com/" target="_blank" rel="noopener">Messenger</a>
+    <a class="sns x" href="https://x.com/messages" target="_blank" rel="noopener">X</a>
+  </div>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -564,6 +646,12 @@
   function collectReplyBadges(dayKey) {
     return earnMilestones().concat(earnSecretBadges(dayKey));
   }
+
+  // 取り消し・修正で累計が下がったら、下回ったマイルストーンは剥奪する（自己申告の撤回に追従）
+  // ※日付ベースのバッジ（おかえり／アンコール／通算日数）は §0 に従い減らさない
+  function recomputeMilestones() {
+    state.badges.earnedMilestones = milestoneThresholdsUpTo(state.reply.total);
+  }
   // バッジ獲得通知：既存トーストの仕組みに乗せ、タイトルをティア色で表示。複数は順番に
   function announceBadges(list) {
     for (var i = 0; i < list.length; i++) {
@@ -599,6 +687,7 @@
     var t = findTask(id);
     if (!t || !t.done) return;
     decOne("reply", t.doneAt || todayKey());  // 完了時に足した分を戻す
+    recomputeMilestones();                     // リセット案：累計が下回ったバッジは剥奪
     t.done = false;
     t.doneAt = null;
     save();
@@ -845,7 +934,75 @@
     if (next <= curFirst) { heatMonth = next; renderHeatmap(); }
   });
 
-  function renderAll() { renderStats(); renderTasks(); renderChart(); renderHeatmap(); }
+  // ---- 獲得したバッジ一覧（獲得済みのみ表示。未獲得は見せない） ----
+  var badgeGrid = document.getElementById("badgeGrid");
+  var badgeNum = document.getElementById("badgeNum");
+  var badgeEmpty = document.getElementById("badgeEmpty");
+  var badgesToggle = document.getElementById("badgesToggle");
+  var badgesBody = document.getElementById("badgesBody");
+  var badgesCollapsed = false;
+
+  function renderBadges() {
+    var chips = [], sec = state.badges.secret;
+    state.badges.earnedMilestones.slice().sort(function (a, b) { return a - b; }).forEach(function (t) {
+      chips.push({ label: "返信" + t + "回", color: tierOfThreshold(t).color });
+    });
+    if (sec.okaeri.count > 0) chips.push({ label: "おかえり", color: SECRET_COLOR });
+    if (sec.encore.earnedDates.length > 0) chips.push({ label: "アンコール", color: SECRET_COLOR });
+    sec.totalDays.earned.slice().sort(function (a, b) { return a - b; }).forEach(function (d) {
+      chips.push({ label: "通算" + d + "日", color: SECRET_COLOR });
+    });
+    badgeNum.textContent = chips.length;
+    badgeGrid.innerHTML = chips.map(function (c) {
+      return '<span class="badge-chip" style="background:' + c.color + '">' + escapeHtml(c.label) + '</span>';
+    }).join("");
+    badgeEmpty.style.display = chips.length ? "none" : "block";
+    badgesToggle.classList.toggle("collapsed", badgesCollapsed);
+    badgesBody.classList.toggle("collapsed", badgesCollapsed);
+  }
+  badgesToggle.addEventListener("click", function () { badgesCollapsed = !badgesCollapsed; renderBadges(); });
+
+  // ---- 過去の記録を修正 ----
+  var editToggle = document.getElementById("editToggle");
+  var editBody = document.getElementById("editBody");
+  var editDate = document.getElementById("editDate");
+  var editReplyVal = document.getElementById("editReplyVal");
+  var editResistVal = document.getElementById("editResistVal");
+  var editCollapsed = true;
+  editDate.value = todayKey();
+
+  function refreshEditValues() {
+    var k = editDate.value || todayKey();
+    editReplyVal.textContent = state.reply.daily[k] || 0;
+    editResistVal.textContent = state.resist.daily[k] || 0;
+  }
+  function applyEdit(metric, delta) {
+    var k = editDate.value || todayKey();
+    if (delta > 0) {
+      addOne(metric, k);
+      if (metric === "reply" && state.activityDates.indexOf(k) === -1) {  // 通算日数は追記のみ
+        state.activityDates.push(k); state.activityDates.sort();
+      }
+    } else {
+      if (!decOne(metric, k)) return;  // 0未満にはしない
+    }
+    if (metric === "reply") recomputeMilestones();  // 修正は無音（お祝い通知は出さない）
+    save(); renderAll(); refreshEditValues();
+  }
+
+  editToggle.addEventListener("click", function () {
+    editCollapsed = !editCollapsed;
+    editToggle.classList.toggle("collapsed", editCollapsed);
+    editBody.classList.toggle("collapsed", editCollapsed);
+  });
+  editDate.addEventListener("change", refreshEditValues);
+  editBody.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-metric]");
+    if (!b) return;
+    applyEdit(b.getAttribute("data-metric"), parseInt(b.getAttribute("data-delta"), 10));
+  });
+
+  function renderAll() { renderStats(); renderTasks(); renderChart(); renderHeatmap(); renderBadges(); refreshEditValues(); }
 
   // ---- インタラクション ----
   function wire(metric, btnId, floatId, undoId) {
@@ -863,8 +1020,10 @@
       announceBadges(newBadges);
     });
     document.getElementById(undoId).addEventListener("click", function () {
-      if (decOne(metric)) { save(); renderAll(); toast("直前の1回を取り消しました"); }
-      else toast("今日の記録がないため取り消せません");
+      if (decOne(metric)) {
+        if (metric === "reply") recomputeMilestones();   // リセット案：バッジを追従
+        save(); renderAll(); toast("直前の1回を取り消しました");
+      } else toast("今日の記録がないため取り消せません");
     });
   }
   wire("reply", "replyBtn", "replyFloat", "replyUndo");
@@ -976,6 +1135,18 @@
     }, 2000);
   }
   function toast(msg) { msgQueue.push(escapeHtml(msg)); pumpMsg(); }
+
+  // Messenger はアプリを優先的に開く（未インストール時のみ Web にフォールバック）
+  var snsMsg = document.getElementById("snsMsg");
+  if (snsMsg) {
+    snsMsg.addEventListener("click", function (e) {
+      e.preventDefault();
+      var fallback = setTimeout(function () { window.location.href = "https://www.messenger.com/"; }, 1000);
+      var onHide = function () { if (document.hidden) { clearTimeout(fallback); document.removeEventListener("visibilitychange", onHide); } };
+      document.addEventListener("visibilitychange", onHide);
+      window.location.href = "fb-messenger://";   // iOS/Android のアプリスキーム
+    });
+  }
 
   window.addEventListener("storage", function (e) { if (e.key === KEY) { state = load(); renderAll(); } });
   document.addEventListener("visibilitychange", function () { if (!document.hidden) renderAll(); });
