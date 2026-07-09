@@ -5,21 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#eaf1fb">
-<title>返信できた！ — 返信トラッカー</title>
+<title>できた！トラッカー — 返信 & 欲求の我慢</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #eef4fc;
-    --bg2: #f7fafe;
     --card: #ffffff;
     --ink: #1f2a37;
     --ink-soft: #5a6b7b;
     --ink-faint: #93a3b3;
     --line: #e2eaf3;
-    --blue: #4a90d9;
+    --blue: #3f83cf;
     --blue-strong: #2f77c4;
     --blue-soft: #a9cbef;
     --blue-bg: #e8f1fc;
+    --teal: #1fa88c;
+    --teal-strong: #17907d;
+    --teal-soft: #9fd9cd;
+    --teal-bg: #e4f6f1;
     --track: #eef3f9;
     --shadow: 0 8px 30px rgba(47,119,196,0.10);
     --danger: #d9694f;
@@ -35,7 +38,7 @@
     font-family: 'Noto Sans JP', system-ui, -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
     font-weight: 400;
     min-height: 100vh;
-    padding: 32px 18px 80px;
+    padding: 30px 18px 80px;
     -webkit-text-size-adjust: 100%;
     overflow-x: hidden;
     line-height: 1.7;
@@ -43,133 +46,112 @@
 
   .wrap { max-width: 680px; margin: 0 auto; }
 
-  header { text-align: center; margin-bottom: 24px; }
+  header { text-align: center; margin-bottom: 22px; }
   .eyebrow {
     display: inline-block;
     font-size: 12px; font-weight: 500; letter-spacing: 0.08em;
     color: var(--blue-strong); background: var(--blue-bg);
     padding: 5px 14px; border-radius: 999px;
   }
-  h1 {
-    font-weight: 700; font-size: 30px; margin-top: 14px; color: var(--ink);
-    letter-spacing: 0.01em;
-  }
+  h1 { font-weight: 700; font-size: 27px; margin-top: 14px; color: var(--ink); letter-spacing: 0.01em; }
 
-  /* 合計（主役） */
-  .hero {
-    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-    box-shadow: var(--shadow); text-align: center;
-    padding: 30px 22px 26px; margin-bottom: 20px;
-  }
-  .hero-label { font-size: 13px; font-weight: 500; color: var(--ink-soft); margin-bottom: 6px; }
-  .hero-num-row { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
-  .hero-num {
-    font-size: 76px; line-height: 1; font-weight: 700; color: var(--blue-strong);
-    letter-spacing: -0.02em;
-    transition: transform .18s cubic-bezier(.2,1.4,.4,1);
-    display: inline-block;
-    font-variant-numeric: tabular-nums;
-  }
-  .hero-num.pop { transform: scale(1.12); }
-  .hero-unit { font-size: 24px; font-weight: 500; color: var(--ink-soft); }
-  .hero-sub { font-size: 14px; color: var(--ink-soft); margin-top: 14px; font-weight: 500; }
+  /* アクションカード（返信 / 我慢） */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  @media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
 
-  /* ボタン */
-  .btn-zone { position: relative; text-align: center; margin-bottom: 22px; }
-  .reply-btn {
+  .card {
     position: relative;
-    background: linear-gradient(180deg, #5a9be0, #3f83cf);
-    border: none;
-    color: #fff;
-    font-weight: 700;
-    font-size: 19px;
-    letter-spacing: 0.06em;
-    padding: 20px 20px;
-    width: 100%;
-    border-radius: 14px;
-    cursor: pointer;
-    transition: transform .12s ease, box-shadow .3s ease, filter .2s ease;
-    box-shadow: 0 10px 24px rgba(47,119,196,0.28);
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow); padding: 22px 18px 20px; text-align: center;
   }
-  .reply-btn:hover { filter: brightness(1.04); box-shadow: 0 12px 30px rgba(47,119,196,0.34); }
-  .reply-btn:active { transform: scale(0.98); }
-  .reply-btn .ico { margin-right: 8px; }
-  .reply-btn.flash { animation: flash .5s ease; }
-  @keyframes flash {
-    0% { box-shadow: 0 0 0 0 rgba(74,144,217,0.45); }
-    100% { box-shadow: 0 0 0 24px rgba(74,144,217,0); }
-  }
-  .undo {
-    display: inline-block; margin-top: 14px;
-    background: none; border: none; cursor: pointer;
-    font-size: 13px; font-weight: 500; color: var(--ink-faint);
-    transition: color .2s ease;
-  }
-  .undo:hover { color: var(--blue-strong); }
-  .undo:disabled { opacity: 0.45; cursor: default; }
-  .undo:disabled:hover { color: var(--ink-faint); }
+  .card .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 7px; vertical-align: middle; }
+  .card .clabel { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+  .card .num-row { display: flex; align-items: baseline; justify-content: center; gap: 5px; margin: 6px 0 2px; }
+  .card .num { font-size: 58px; line-height: 1; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; transition: transform .18s cubic-bezier(.2,1.4,.4,1); display: inline-block; }
+  .card .unit { font-size: 19px; font-weight: 500; color: var(--ink-soft); }
+  .card .num.pop { transform: scale(1.13); }
+  .card .today { font-size: 12px; color: var(--ink-faint); margin-bottom: 16px; }
+  .card .today b { font-weight: 700; }
 
-  /* 浮かぶ +1 */
-  .float1 {
-    position: absolute; left: 50%; top: 4px; transform: translateX(-50%);
-    font-size: 30px; font-weight: 700; color: var(--blue-strong);
-    pointer-events: none; opacity: 0;
+  .card.reply .num, .card.reply .clabel { color: var(--blue-strong); }
+  .card.reply .dot { background: var(--blue); }
+  .card.resist .num, .card.resist .clabel { color: var(--teal-strong); }
+  .card.resist .dot { background: var(--teal); }
+
+  .act-btn {
+    width: 100%; border: none; color: #fff; font-weight: 700; font-size: 17px;
+    letter-spacing: 0.04em; padding: 16px 12px; border-radius: 13px; cursor: pointer;
+    transition: transform .12s ease, box-shadow .3s ease, filter .2s ease;
   }
+  .card.reply .act-btn { background: linear-gradient(180deg, #5a9be0, #3f83cf); box-shadow: 0 9px 22px rgba(47,119,196,0.26); }
+  .card.resist .act-btn { background: linear-gradient(180deg, #35c0a6, #1fa88c); box-shadow: 0 9px 22px rgba(23,144,125,0.24); }
+  .act-btn:hover { filter: brightness(1.04); }
+  .act-btn:active { transform: scale(0.97); }
+  .act-btn .ico { margin-right: 7px; }
+  .card.reply .act-btn.flash { animation: flashB .5s ease; }
+  .card.resist .act-btn.flash { animation: flashT .5s ease; }
+  @keyframes flashB { 0% { box-shadow: 0 0 0 0 rgba(74,144,217,0.45); } 100% { box-shadow: 0 0 0 22px rgba(74,144,217,0); } }
+  @keyframes flashT { 0% { box-shadow: 0 0 0 0 rgba(31,168,140,0.45); } 100% { box-shadow: 0 0 0 22px rgba(31,168,140,0); } }
+
+  .undo {
+    display: inline-block; margin-top: 12px; background: none; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 500; color: var(--ink-faint); transition: color .2s ease;
+  }
+  .card.reply .undo:hover:not(:disabled) { color: var(--blue-strong); }
+  .card.resist .undo:hover:not(:disabled) { color: var(--teal-strong); }
+  .undo:disabled { opacity: 0.4; cursor: default; }
+
+  .float1 {
+    position: absolute; left: 50%; bottom: 62px; transform: translateX(-50%);
+    font-size: 28px; font-weight: 700; pointer-events: none; opacity: 0;
+  }
+  .card.reply .float1 { color: var(--blue-strong); }
+  .card.resist .float1 { color: var(--teal-strong); }
   .float1.go { animation: rise 1s ease-out forwards; }
   @keyframes rise {
-    0% { opacity: 0; transform: translate(-50%, 4px) scale(0.8); }
+    0% { opacity: 0; transform: translate(-50%, 6px) scale(0.8); }
     18% { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -52px) scale(1.05); }
+    100% { opacity: 0; transform: translate(-50%, -46px) scale(1.05); }
   }
 
-  /* 統計カード */
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .stat {
-    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    box-shadow: var(--shadow); padding: 18px 10px; text-align: center;
-  }
-  .stat .n { font-size: 34px; line-height: 1; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
-  .stat.accent .n { color: var(--blue-strong); }
-  .stat .l { font-size: 12px; font-weight: 500; color: var(--ink-soft); margin-top: 9px; }
+  .hero-sub { text-align: center; font-size: 14px; font-weight: 500; color: var(--ink-soft); margin: -4px 0 20px; }
 
   /* グラフ */
   .chart-card {
     background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-    box-shadow: var(--shadow); padding: 22px 18px 16px;
+    box-shadow: var(--shadow); padding: 22px 16px 16px;
   }
-  .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
   .chart-head h2 { font-size: 15px; font-weight: 700; color: var(--ink); }
   .rangebar { display: flex; background: var(--track); border-radius: 10px; padding: 3px; }
   .rangebar button {
     background: transparent; border: none; color: var(--ink-soft);
-    font-size: 13px; font-weight: 500; padding: 6px 14px; cursor: pointer;
+    font-size: 13px; font-weight: 500; padding: 6px 13px; cursor: pointer;
     border-radius: 8px; transition: all .18s ease;
   }
   .rangebar button.active { background: #fff; color: var(--blue-strong); box-shadow: 0 1px 4px rgba(47,119,196,0.14); }
+
+  .legend { display: flex; gap: 18px; margin-bottom: 8px; padding-left: 4px; }
+  .legend .item { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--ink-soft); }
+  .legend .ldot { width: 20px; height: 3px; border-radius: 2px; position: relative; }
+  .legend .ldot::after { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 8px; height: 8px; border-radius: 50%; border: 2px solid #fff; }
+  .legend .reply .ldot { background: var(--blue); } .legend .reply .ldot::after { background: var(--blue); }
+  .legend .resist .ldot { background: var(--teal); } .legend .resist .ldot::after { background: var(--teal); }
+
   svg { width: 100%; height: auto; display: block; overflow: visible; }
-
-  .bar { transition: height .4s cubic-bezier(.2,.9,.3,1), y .4s cubic-bezier(.2,.9,.3,1); }
-  .bar-track { fill: var(--track); }
-  .bar-val { fill: url(#blueGrad); }
-  .bar-today { fill: #2f77c4; }
-  .tick { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; font-weight: 500; fill: var(--ink-faint); }
-  .barcount { font-family: 'Noto Sans JP', sans-serif; font-size: 10px; font-weight: 700; fill: var(--blue-strong); }
-
   .empty-note { text-align: center; color: var(--ink-soft); font-size: 14px; padding: 34px 10px; line-height: 1.9; }
 
   /* フッター操作 */
   .tools { display: flex; justify-content: center; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
   .tools button {
     background: #fff; border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
-    font-size: 12px; font-weight: 500; color: var(--ink-soft); padding: 9px 16px;
-    transition: all .18s ease;
+    font-size: 12px; font-weight: 500; color: var(--ink-soft); padding: 9px 16px; transition: all .18s ease;
   }
   .tools button:hover { border-color: var(--blue-soft); color: var(--blue-strong); }
   .tools .danger:hover { border-color: var(--danger); color: var(--danger); }
 
-  footer { text-align: center; margin-top: 28px; font-size: 12px; color: var(--ink-faint); line-height: 1.9; }
+  footer { text-align: center; margin-top: 26px; font-size: 12px; color: var(--ink-faint); line-height: 1.9; }
 
-  /* トースト */
   .toast {
     position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px);
     background: #fff; border: 1px solid var(--blue-soft); color: var(--blue-strong);
@@ -183,44 +165,44 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">返信トラッカー</div>
-    <h1>返信できた！</h1>
+    <div class="eyebrow">できた！トラッカー</div>
+    <h1>返信できた・我慢できた</h1>
   </header>
 
-  <!-- 合計（主役） -->
-  <div class="hero">
-    <div class="hero-label">これまでの累計返信</div>
-    <div class="hero-num-row"><span class="hero-num" id="totalNum">0</span><span class="hero-unit">回</span></div>
-    <div class="hero-sub" id="heroSub">最初の一通から始めよう。</div>
-  </div>
+  <div class="hero-sub" id="heroSub">ボタンを押して、できた回数を積み上げよう。</div>
 
-  <!-- ボタン -->
-  <div class="btn-zone">
-    <button type="button" class="reply-btn" id="replyBtn">
-      <span class="ico">✓</span>返信できた
-    </button>
-    <div class="float1" id="float1">+1</div>
-    <div>
-      <button type="button" class="undo" id="undoBtn" disabled>直前の1回を取り消す</button>
+  <div class="cards">
+    <div class="card reply">
+      <div><span class="dot"></span><span class="clabel">累計 返信できた</span></div>
+      <div class="num-row"><span class="num" id="replyTotal">0</span><span class="unit">回</span></div>
+      <div class="today">今日 <b id="replyToday">0</b> 回</div>
+      <button type="button" class="act-btn" id="replyBtn"><span class="ico">✓</span>返信できた</button>
+      <div class="float1" id="replyFloat">+1</div>
+      <div><button type="button" class="undo" id="replyUndo" disabled>取り消す</button></div>
+    </div>
+
+    <div class="card resist">
+      <div><span class="dot"></span><span class="clabel">累計 欲求を我慢</span></div>
+      <div class="num-row"><span class="num" id="resistTotal">0</span><span class="unit">回</span></div>
+      <div class="today">今日 <b id="resistToday">0</b> 回</div>
+      <button type="button" class="act-btn" id="resistBtn"><span class="ico">✦</span>我慢できた</button>
+      <div class="float1" id="resistFloat">+1</div>
+      <div><button type="button" class="undo" id="resistUndo" disabled>取り消す</button></div>
     </div>
   </div>
 
-  <!-- 統計 -->
-  <div class="stats">
-    <div class="stat accent"><div class="n" id="todayNum">0</div><div class="l">今日</div></div>
-    <div class="stat"><div class="n" id="streakNum">0</div><div class="l">連続日数</div></div>
-    <div class="stat"><div class="n" id="bestNum">0</div><div class="l">1日の最高</div></div>
-  </div>
-
-  <!-- グラフ -->
   <div class="chart-card">
     <div class="chart-head">
-      <h2>1日ごとの返信数</h2>
+      <h2>1日ごとの回数</h2>
       <div class="rangebar" id="rangeBar">
         <button type="button" data-days="7">7日</button>
         <button type="button" data-days="14" class="active">14日</button>
         <button type="button" data-days="30">30日</button>
       </div>
+    </div>
+    <div class="legend">
+      <div class="item reply"><span class="ldot"></span>返信できた</div>
+      <div class="item resist"><span class="ldot"></span>欲求を我慢</div>
     </div>
     <div id="chartArea"></div>
   </div>
@@ -244,7 +226,7 @@
 (function () {
   "use strict";
 
-  var KEY = "reply_tracker_v1";
+  var KEY = "done_tracker_v2";
   var MAX_HISTORY = 400;
 
   var state = load();
@@ -258,21 +240,37 @@
     return y + "-" + m + "-" + day;
   }
 
+  function emptyMetric() { return { total: 0, daily: {}, log: [] }; }
+
   function load() {
+    // v2
     try {
       var raw = localStorage.getItem(KEY);
-      if (!raw) raw = localStorage.getItem("soulound_reply_tracker_v1"); // 旧キーからの移行
       if (raw) {
         var s = JSON.parse(raw);
-        if (s && typeof s === "object") {
-          s.total = s.total || 0;
-          s.daily = s.daily || {};
-          s.log = s.log || [];
+        if (s && s.reply && s.resist) {
+          s.reply = normMetric(s.reply);
+          s.resist = normMetric(s.resist);
           return s;
         }
       }
     } catch (e) {}
-    return { total: 0, daily: {}, log: [] };
+    // v1 からの移行（返信のみ記録されていた）
+    try {
+      var old = localStorage.getItem("reply_tracker_v1") || localStorage.getItem("soulound_reply_tracker_v1");
+      if (old) {
+        var o = JSON.parse(old);
+        if (o && typeof o === "object") {
+          return { reply: normMetric(o), resist: emptyMetric() };
+        }
+      }
+    } catch (e) {}
+    return { reply: emptyMetric(), resist: emptyMetric() };
+  }
+
+  function normMetric(m) {
+    m = m || {};
+    return { total: m.total || 0, daily: m.daily || {}, log: m.log || [] };
   }
 
   function save() {
@@ -280,42 +278,26 @@
     catch (e) { toast("保存できませんでした（プライベートモード？）"); }
   }
 
-  function addOne() {
+  function addOne(metric) {
+    var m = state[metric];
     var k = todayKey();
-    state.daily[k] = (state.daily[k] || 0) + 1;
-    state.total += 1;
-    state.log.push(Date.now());
-    if (state.log.length > MAX_HISTORY) state.log = state.log.slice(-MAX_HISTORY);
+    m.daily[k] = (m.daily[k] || 0) + 1;
+    m.total += 1;
+    m.log.push(Date.now());
+    if (m.log.length > MAX_HISTORY) m.log = m.log.slice(-MAX_HISTORY);
     save();
   }
 
-  function undoOne() {
-    if (state.total <= 0) return false;
+  function undoOne(metric) {
+    var m = state[metric];
     var k = todayKey();
-    if (!state.daily[k]) { toast("今日の記録がないため取り消せません"); return false; }
-    state.daily[k] -= 1;
-    if (state.daily[k] <= 0) delete state.daily[k];
-    state.total = Math.max(0, state.total - 1);
-    if (state.log.length) state.log.pop();
+    if (!m.daily[k]) { toast("今日の記録がないため取り消せません"); return false; }
+    m.daily[k] -= 1;
+    if (m.daily[k] <= 0) delete m.daily[k];
+    m.total = Math.max(0, m.total - 1);
+    if (m.log.length) m.log.pop();
     save();
     return true;
-  }
-
-  function computeStreak() {
-    var streak = 0;
-    var d = new Date();
-    if (!state.daily[todayKey(d)]) d.setDate(d.getDate() - 1);
-    while (state.daily[todayKey(d)]) {
-      streak += 1;
-      d.setDate(d.getDate() - 1);
-    }
-    return streak;
-  }
-
-  function bestDay() {
-    var best = 0;
-    for (var k in state.daily) if (state.daily[k] > best) best = state.daily[k];
-    return best;
   }
 
   function lastNDays(n) {
@@ -325,115 +307,150 @@
       var dd = new Date(d);
       dd.setDate(d.getDate() - i);
       var k = todayKey(dd);
-      arr.push({ key: k, date: dd, count: state.daily[k] || 0 });
+      arr.push({ key: k, date: dd, reply: state.reply.daily[k] || 0, resist: state.resist.daily[k] || 0 });
     }
     return arr;
   }
 
-  var totalNum = document.getElementById("totalNum");
+  // ---- 参照 ----
+  var replyTotal = document.getElementById("replyTotal");
+  var resistTotal = document.getElementById("resistTotal");
+  var replyToday = document.getElementById("replyToday");
+  var resistToday = document.getElementById("resistToday");
+  var replyUndo = document.getElementById("replyUndo");
+  var resistUndo = document.getElementById("resistUndo");
   var heroSub = document.getElementById("heroSub");
-  var todayNum = document.getElementById("todayNum");
-  var streakNum = document.getElementById("streakNum");
-  var bestNum = document.getElementById("bestNum");
-  var undoBtn = document.getElementById("undoBtn");
+  var chartArea = document.getElementById("chartArea");
 
-  function heroMessage(total, today) {
-    if (total === 0) return "最初の一通から始めよう。";
-    if (today === 0) return "今日はまだ0回。ひと息ついたら、一通いこう。";
-    if (today >= 10) return "今日はすごい。よくやりきった。";
-    if (today >= 5) return "いい流れ。今日もしっかり返せている。";
-    if (today >= 1) return "その一通、ちゃんと届いた。えらい。";
-    return "";
+  function heroMessage() {
+    var tk = todayKey();
+    var r = state.reply.daily[tk] || 0;
+    var g = state.resist.daily[tk] || 0;
+    if (state.reply.total === 0 && state.resist.total === 0) return "ボタンを押して、できた回数を積み上げよう。";
+    if (r === 0 && g === 0) return "今日はまだ0回。ひとつ「できた」を増やそう。";
+    if (r + g >= 10) return "今日はよく頑張った。ちゃんと積み上がっている。";
+    if (g >= 1 && r >= 1) return "返信も、我慢も。今日のあなた、えらい。";
+    if (g >= 1) return "その我慢、価値がある。よく踏みとどまった。";
+    return "その一通、ちゃんと届いた。えらい。";
   }
 
   function renderStats() {
-    var today = state.daily[todayKey()] || 0;
-    totalNum.textContent = state.total;
-    todayNum.textContent = today;
-    streakNum.textContent = computeStreak();
-    bestNum.textContent = bestDay();
-    heroSub.textContent = heroMessage(state.total, today);
-    undoBtn.disabled = today <= 0;
+    var tk = todayKey();
+    replyTotal.textContent = state.reply.total;
+    resistTotal.textContent = state.resist.total;
+    replyToday.textContent = state.reply.daily[tk] || 0;
+    resistToday.textContent = state.resist.daily[tk] || 0;
+    replyUndo.disabled = !(state.reply.daily[tk] > 0);
+    resistUndo.disabled = !(state.resist.daily[tk] > 0);
+    heroSub.textContent = heroMessage();
   }
 
-  var chartArea = document.getElementById("chartArea");
+  function buildLine(data, field, W, padL, slot, baseY, innerH, maxVal) {
+    var pts = [];
+    for (var i = 0; i < data.length; i++) {
+      var cx = padL + slot * i + slot / 2;
+      var cy = baseY - (data[i][field] / maxVal) * innerH;
+      pts.push([cx, cy]);
+    }
+    return pts;
+  }
+
+  function pathFrom(pts) {
+    var dstr = "";
+    for (var i = 0; i < pts.length; i++) {
+      dstr += (i === 0 ? "M" : "L") + pts[i][0].toFixed(1) + "," + pts[i][1].toFixed(1) + " ";
+    }
+    return dstr.trim();
+  }
 
   function renderChart() {
     var data = lastNDays(rangeDays);
-    var hasAny = data.some(function (d) { return d.count > 0; });
-    if (!hasAny && state.total === 0) {
-      chartArea.innerHTML = '<div class="empty-note">まだ記録がありません。<br>「返信できた」を押すと、ここに今日の棒が立ち上がります。</div>';
+    var anyData = state.reply.total > 0 || state.resist.total > 0;
+    if (!anyData) {
+      chartArea.innerHTML = '<div class="empty-note">まだ記録がありません。<br>ボタンを押すと、ここに折れ線が描かれていきます。</div>';
       return;
     }
 
-    var W = 660, H = 240;
-    var padL = 4, padR = 4, padTop = 22, padBottom = 26;
+    var W = 660, H = 250;
+    var padL = 10, padR = 10, padTop = 18, padBottom = 26;
     var innerW = W - padL - padR;
     var innerH = H - padTop - padBottom;
     var n = data.length;
     var slot = innerW / n;
-    var barW = Math.min(slot * 0.6, 28);
-    var maxVal = Math.max(1, data.reduce(function (m, d) { return Math.max(m, d.count); }, 0));
-    var tk = todayKey();
+    var baseY = padTop + innerH;
+
+    var maxVal = 1;
+    for (var i = 0; i < n; i++) { maxVal = Math.max(maxVal, data[i].reply, data[i].resist); }
+
     var showEveryLabel = n <= 14;
 
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="1日ごとの返信数の棒グラフ">';
-    svg += '<defs><linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">' +
-           '<stop offset="0%" stop-color="#6aa6e6"/><stop offset="100%" stop-color="#4a90d9"/>' +
-           '</linearGradient></defs>';
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="返信できた回数と欲求を我慢した回数の折れ線グラフ">';
 
-    var baseY = padTop + innerH;
-    svg += '<line x1="' + padL + '" y1="' + baseY + '" x2="' + (W - padR) + '" y2="' + baseY + '" stroke="#e2eaf3" stroke-width="1"/>';
+    // 目盛り線（0 と 最大）
+    var gridVals = maxVal <= 4 ? range1(maxVal) : [0, Math.ceil(maxVal / 2), maxVal];
+    for (var g = 0; g < gridVals.length; g++) {
+      var gv = gridVals[g];
+      var gy = baseY - (gv / maxVal) * innerH;
+      svg += '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + gy.toFixed(1) +
+             '" stroke="' + (gv === 0 ? "#e2eaf3" : "#eef3f9") + '" stroke-width="1"/>';
+      svg += '<text x="' + (padL - 4) + '" y="' + (gy + 3).toFixed(1) + '" text-anchor="end" font-size="9" font-family="Noto Sans JP, sans-serif" fill="#93a3b3">' + gv + '</text>';
+    }
 
-    for (var i = 0; i < n; i++) {
-      var d = data[i];
-      var cx = padL + slot * i + slot / 2;
-      var x = cx - barW / 2;
-      var h = (d.count / maxVal) * innerH;
-      var y = baseY - h;
-      var isToday = d.key === tk;
-
-      svg += '<rect class="bar-track" x="' + x.toFixed(1) + '" y="' + padTop + '" width="' + barW.toFixed(1) +
-             '" height="' + innerH + '" rx="4"/>';
-
-      if (d.count > 0) {
-        svg += '<rect class="bar ' + (isToday ? 'bar-today' : 'bar-val') + '" x="' + x.toFixed(1) +
-               '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="4">' +
-               '<title>' + d.key + '：' + d.count + '回</title></rect>';
-        svg += '<text class="barcount" x="' + cx.toFixed(1) + '" y="' + (y - 6).toFixed(1) +
-               '" text-anchor="middle">' + d.count + '</text>';
-      }
-
-      var label = (d.date.getMonth() + 1) + "/" + d.date.getDate();
-      var drawLabel = showEveryLabel || i === 0 || i === n - 1 || (i % Math.ceil(n / 8) === 0);
+    // 日付ラベル
+    for (var j = 0; j < n; j++) {
+      var cx = padL + slot * j + slot / 2;
+      var drawLabel = showEveryLabel || j === 0 || j === n - 1 || (j % Math.ceil(n / 8) === 0);
       if (drawLabel) {
-        svg += '<text class="tick" x="' + cx.toFixed(1) + '" y="' + (baseY + 16) +
-               '" text-anchor="middle"' + (isToday ? ' fill="#2f77c4" font-weight="700"' : '') + '>' + label + '</text>';
+        var label = (data[j].date.getMonth() + 1) + "/" + data[j].date.getDate();
+        svg += '<text x="' + cx.toFixed(1) + '" y="' + (baseY + 16) + '" text-anchor="middle" font-size="10" font-family="Noto Sans JP, sans-serif" fill="#93a3b3">' + label + '</text>';
       }
     }
+
+    var replyPts = buildLine(data, "reply", W, padL, slot, baseY, innerH, maxVal);
+    var resistPts = buildLine(data, "resist", W, padL, slot, baseY, innerH, maxVal);
+
+    svg += drawSeries(resistPts, data, "resist", "#1fa88c");
+    svg += drawSeries(replyPts, data, "reply", "#3f83cf");
 
     svg += '</svg>';
     chartArea.innerHTML = svg;
   }
 
+  function range1(max) { var a = []; for (var i = 0; i <= max; i++) a.push(i); return a; }
+
+  function drawSeries(pts, data, field, color) {
+    var s = '<path d="' + pathFrom(pts) + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    for (var i = 0; i < pts.length; i++) {
+      var val = data[i][field];
+      var r = val > 0 ? 4 : 2.5;
+      s += '<circle cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="' + r +
+           '" fill="#fff" stroke="' + color + '" stroke-width="2">' +
+           '<title>' + data[i].key + '｜' + (field === "reply" ? "返信" : "我慢") + ' ' + val + '回</title></circle>';
+    }
+    return s;
+  }
+
   function renderAll() { renderStats(); renderChart(); }
 
-  var replyBtn = document.getElementById("replyBtn");
-  var float1 = document.getElementById("float1");
-  var heroNum = totalNum;
-
-  replyBtn.addEventListener("click", function () {
-    addOne();
-    renderAll();
-    heroNum.classList.remove("pop"); void heroNum.offsetWidth; heroNum.classList.add("pop");
-    replyBtn.classList.remove("flash"); void replyBtn.offsetWidth; replyBtn.classList.add("flash");
-    float1.classList.remove("go"); void float1.offsetWidth; float1.classList.add("go");
-    if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
-  });
-
-  undoBtn.addEventListener("click", function () {
-    if (undoOne()) { renderAll(); toast("直前の1回を取り消しました"); }
-  });
+  // ---- インタラクション ----
+  function wire(metric, btnId, floatId, undoId) {
+    var btn = document.getElementById(btnId);
+    var flt = document.getElementById(floatId);
+    var num = document.getElementById(metric + "Total");
+    btn.addEventListener("click", function () {
+      addOne(metric);
+      renderAll();
+      num.classList.remove("pop"); void num.offsetWidth; num.classList.add("pop");
+      btn.classList.remove("flash"); void btn.offsetWidth; btn.classList.add("flash");
+      flt.classList.remove("go"); void flt.offsetWidth; flt.classList.add("go");
+      if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+    });
+    document.getElementById(undoId).addEventListener("click", function () {
+      if (undoOne(metric)) { renderAll(); toast("直前の1回を取り消しました"); }
+    });
+  }
+  wire("reply", "replyBtn", "replyFloat", "replyUndo");
+  wire("resist", "resistBtn", "resistFloat", "resistUndo");
 
   document.getElementById("rangeBar").addEventListener("click", function (e) {
     var b = e.target.closest("button");
@@ -448,10 +465,8 @@
     var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    a.href = url;
-    a.download = "reply-tracker-" + todayKey() + ".json";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = "done-tracker-" + todayKey() + ".json";
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     toast("データを書き出しました");
   });
 
@@ -464,12 +479,11 @@
     reader.onload = function () {
       try {
         var s = JSON.parse(reader.result);
-        if (!s || typeof s !== "object" || typeof s.daily !== "object") throw new Error("bad");
-        state = { total: s.total || 0, daily: s.daily || {}, log: s.log || [] };
-        if (!s.total) {
-          var sum = 0; for (var k in state.daily) sum += state.daily[k];
-          state.total = sum;
-        }
+        if (s && s.reply && s.resist) {
+          state = { reply: normMetric(s.reply), resist: normMetric(s.resist) };
+        } else if (s && typeof s.daily === "object") { // 旧形式（返信のみ）
+          state = { reply: normMetric(s), resist: emptyMetric() };
+        } else { throw new Error("bad"); }
         save(); renderAll();
         toast("データを読み込みました");
       } catch (e) { toast("読み込めませんでした（形式が不正です）"); }
@@ -480,7 +494,7 @@
 
   document.getElementById("resetBtn").addEventListener("click", function () {
     if (!confirm("すべての記録を消去します。よろしいですか？\n（先に「データを書き出す」でバックアップできます）")) return;
-    state = { total: 0, daily: {}, log: [] };
+    state = { reply: emptyMetric(), resist: emptyMetric() };
     save(); renderAll();
     toast("記録をリセットしました");
   });
@@ -494,12 +508,8 @@
     toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
   }
 
-  window.addEventListener("storage", function (e) {
-    if (e.key === KEY) { state = load(); renderAll(); }
-  });
-  document.addEventListener("visibilitychange", function () {
-    if (!document.hidden) renderAll();
-  });
+  window.addEventListener("storage", function (e) { if (e.key === KEY) { state = load(); renderAll(); } });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) renderAll(); });
 
   renderAll();
 })();
