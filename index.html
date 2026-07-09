@@ -31,6 +31,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { background: var(--bg); }
   button { -webkit-tap-highlight-color: rgba(74,144,217,0.2); touch-action: manipulation; font-family: inherit; }
+  input { font-family: inherit; }
   body {
     background: linear-gradient(180deg, #eef4fc 0%, #f7fafe 100%);
     background-attachment: fixed;
@@ -56,7 +57,7 @@
   h1 { font-weight: 700; font-size: 27px; margin-top: 14px; color: var(--ink); letter-spacing: 0.01em; }
 
   /* アクションカード（返信 / 我慢） */
-  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
   @media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
 
   .card {
@@ -114,13 +115,70 @@
     100% { opacity: 0; transform: translate(-50%, -46px) scale(1.05); }
   }
 
-  .hero-sub { text-align: center; font-size: 14px; font-weight: 500; color: var(--ink-soft); margin: -4px 0 20px; }
+  .hero-sub { text-align: center; font-size: 14px; font-weight: 500; color: var(--ink-soft); margin: -2px 0 18px; }
+
+  /* 共通パネル */
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow); padding: 20px 18px 18px; margin-bottom: 16px;
+  }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .panel-head h2 { font-size: 15px; font-weight: 700; color: var(--ink); }
+
+  /* タスク */
+  .task-count { font-size: 12px; font-weight: 500; color: var(--ink-faint); }
+  .task-count b { font-weight: 700; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  .task-add { display: flex; gap: 8px; margin: 14px 0 6px; }
+  .task-add input {
+    flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 11px;
+    padding: 11px 13px; font-size: 15px; color: var(--ink); background: #fbfdff; outline: none;
+    transition: border-color .15s ease;
+  }
+  .task-add input:focus { border-color: var(--blue-soft); }
+  .task-add button {
+    border: none; background: linear-gradient(180deg, #5a9be0, #3f83cf); color: #fff;
+    font-weight: 700; font-size: 14px; padding: 0 18px; border-radius: 11px; cursor: pointer;
+    transition: filter .2s ease, transform .1s ease;
+  }
+  .task-add button:hover { filter: brightness(1.05); }
+  .task-add button:active { transform: scale(0.97); }
+
+  ul.tasks { list-style: none; margin-top: 6px; }
+  .task {
+    display: flex; align-items: center; gap: 12px; padding: 12px 2px;
+    border-bottom: 1px solid var(--line);
+  }
+  .task:last-child { border-bottom: none; }
+  .check {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid var(--blue-soft); background: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    transition: all .15s ease;
+  }
+  .check:hover { border-color: var(--blue); background: var(--blue-bg); }
+  .check svg { width: 14px; height: 14px; opacity: 0; }
+  .ttext { flex: 1; font-size: 15px; color: var(--ink); word-break: break-word; }
+  .del {
+    flex-shrink: 0; background: none; border: none; color: var(--ink-faint); cursor: pointer;
+    font-size: 20px; line-height: 1; padding: 4px 6px; border-radius: 8px; transition: color .15s ease;
+  }
+  .del:hover { color: var(--danger); }
+
+  .task.done .check { background: var(--teal); border-color: var(--teal); }
+  .task.done .check svg { opacity: 1; }
+  .task.done .ttext { color: var(--ink-faint); text-decoration: line-through; }
+
+  .done-head {
+    font-size: 12px; font-weight: 700; color: var(--ink-faint); margin-top: 16px;
+    cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px;
+  }
+  .done-head .caret { transition: transform .2s ease; }
+  .done-head.collapsed .caret { transform: rotate(-90deg); }
+  ul.done-list.collapsed { display: none; }
+  .task-empty { color: var(--ink-faint); font-size: 13px; padding: 14px 2px 4px; }
 
   /* グラフ */
-  .chart-card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-    box-shadow: var(--shadow); padding: 22px 16px 16px;
-  }
   .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
   .chart-head h2 { font-size: 15px; font-weight: 700; color: var(--ink); }
   .rangebar { display: flex; background: var(--track); border-radius: 10px; padding: 3px; }
@@ -138,7 +196,7 @@
   .legend .reply .ldot { background: var(--blue); } .legend .reply .ldot::after { background: var(--blue); }
   .legend .resist .ldot { background: var(--teal); } .legend .resist .ldot::after { background: var(--teal); }
 
-  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
   .empty-note { text-align: center; color: var(--ink-soft); font-size: 14px; padding: 34px 10px; line-height: 1.9; }
 
   /* フッター操作 */
@@ -191,7 +249,27 @@
     </div>
   </div>
 
-  <div class="chart-card">
+  <!-- タスク（返信が必要なタスク） -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>返信が必要なタスク</h2>
+      <div class="task-count" id="taskCount">返信が必要な回数　<b>0</b> 件</div>
+    </div>
+    <div class="task-add">
+      <input type="text" id="taskInput" placeholder="例：〇〇さんに返信" maxlength="120" enterkeyhint="done">
+      <button type="button" id="taskAddBtn">追加</button>
+    </div>
+    <ul class="tasks" id="pendingList"></ul>
+    <div class="task-empty" id="taskEmpty" style="display:none">いま返信が必要なタスクはありません。</div>
+
+    <div class="done-head" id="doneHead" style="display:none">
+      <span class="caret">▾</span><span>完了済み <span id="doneCount">0</span></span>
+    </div>
+    <ul class="tasks done-list" id="doneList"></ul>
+  </div>
+
+  <!-- グラフ -->
+  <div class="panel">
     <div class="chart-head">
       <h2>1日ごとの回数</h2>
       <div class="rangebar" id="rangeBar">
@@ -228,9 +306,11 @@
 
   var KEY = "done_tracker_v2";
   var MAX_HISTORY = 400;
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   var state = load();
   var rangeDays = 14;
+  var doneCollapsed = true;
 
   function todayKey(d) {
     d = d || new Date();
@@ -241,36 +321,27 @@
   }
 
   function emptyMetric() { return { total: 0, daily: {}, log: [] }; }
+  function normMetric(m) { m = m || {}; return { total: m.total || 0, daily: m.daily || {}, log: m.log || [] }; }
 
   function load() {
-    // v2
     try {
       var raw = localStorage.getItem(KEY);
       if (raw) {
         var s = JSON.parse(raw);
         if (s && s.reply && s.resist) {
-          s.reply = normMetric(s.reply);
-          s.resist = normMetric(s.resist);
-          return s;
+          return { reply: normMetric(s.reply), resist: normMetric(s.resist), tasks: Array.isArray(s.tasks) ? s.tasks : [] };
         }
       }
     } catch (e) {}
-    // v1 からの移行（返信のみ記録されていた）
+    // v1（返信のみ）からの移行
     try {
       var old = localStorage.getItem("reply_tracker_v1") || localStorage.getItem("soulound_reply_tracker_v1");
       if (old) {
         var o = JSON.parse(old);
-        if (o && typeof o === "object") {
-          return { reply: normMetric(o), resist: emptyMetric() };
-        }
+        if (o && typeof o === "object") return { reply: normMetric(o), resist: emptyMetric(), tasks: [] };
       }
     } catch (e) {}
-    return { reply: emptyMetric(), resist: emptyMetric() };
-  }
-
-  function normMetric(m) {
-    m = m || {};
-    return { total: m.total || 0, daily: m.daily || {}, log: m.log || [] };
+    return { reply: emptyMetric(), resist: emptyMetric(), tasks: [] };
   }
 
   function save() {
@@ -278,27 +349,66 @@
     catch (e) { toast("保存できませんでした（プライベートモード？）"); }
   }
 
-  function addOne(metric) {
+  // ---- カウンタ ----
+  function addOne(metric, dayKey) {
     var m = state[metric];
-    var k = todayKey();
+    var k = dayKey || todayKey();
     m.daily[k] = (m.daily[k] || 0) + 1;
     m.total += 1;
     m.log.push(Date.now());
     if (m.log.length > MAX_HISTORY) m.log = m.log.slice(-MAX_HISTORY);
-    save();
   }
 
-  function undoOne(metric) {
+  function decOne(metric, dayKey) {
     var m = state[metric];
-    var k = todayKey();
-    if (!m.daily[k]) { toast("今日の記録がないため取り消せません"); return false; }
+    var k = dayKey || todayKey();
+    if (!m.daily[k]) return false;
     m.daily[k] -= 1;
     if (m.daily[k] <= 0) delete m.daily[k];
     m.total = Math.max(0, m.total - 1);
     if (m.log.length) m.log.pop();
-    save();
     return true;
   }
+
+  // ---- タスク ----
+  function addTask(text) {
+    text = (text || "").trim();
+    if (!text) return;
+    state.tasks.push({ id: "t" + Date.now() + Math.floor(Math.random() * 1000), text: text, done: false, doneAt: null });
+    save();
+  }
+
+  function completeTask(id) {
+    var t = findTask(id);
+    if (!t || t.done) return;
+    t.done = true;
+    t.doneAt = todayKey();
+    addOne("reply", t.doneAt);   // 相乗：返信回数も+1
+    save();
+    popReply();
+    toast("返信できた！ ＋1");
+  }
+
+  function reopenTask(id) {
+    var t = findTask(id);
+    if (!t || !t.done) return;
+    decOne("reply", t.doneAt || todayKey());  // 完了時に足した分を戻す
+    t.done = false;
+    t.doneAt = null;
+    save();
+  }
+
+  function deleteTask(id) {
+    state.tasks = state.tasks.filter(function (t) { return t.id !== id; });
+    save();
+  }
+
+  function findTask(id) {
+    for (var i = 0; i < state.tasks.length; i++) if (state.tasks[i].id === id) return state.tasks[i];
+    return null;
+  }
+
+  function pendingCount() { return state.tasks.filter(function (t) { return !t.done; }).length; }
 
   function lastNDays(n) {
     var arr = [];
@@ -312,7 +422,13 @@
     return arr;
   }
 
-  // ---- 参照 ----
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ---- DOM 参照 ----
   var replyTotal = document.getElementById("replyTotal");
   var resistTotal = document.getElementById("resistTotal");
   var replyToday = document.getElementById("replyToday");
@@ -321,6 +437,18 @@
   var resistUndo = document.getElementById("resistUndo");
   var heroSub = document.getElementById("heroSub");
   var chartArea = document.getElementById("chartArea");
+  var taskCount = document.getElementById("taskCount");
+  var pendingList = document.getElementById("pendingList");
+  var doneList = document.getElementById("doneList");
+  var taskEmpty = document.getElementById("taskEmpty");
+  var doneHead = document.getElementById("doneHead");
+  var doneCountEl = document.getElementById("doneCount");
+  var replyNum = replyTotal;
+
+  function popReply() {
+    replyNum.classList.remove("pop"); void replyNum.offsetWidth; replyNum.classList.add("pop");
+    if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+  }
 
   function heroMessage() {
     var tk = todayKey();
@@ -345,58 +473,89 @@
     heroSub.textContent = heroMessage();
   }
 
-  function buildLine(data, field, W, padL, slot, baseY, innerH, maxVal) {
-    var pts = [];
-    for (var i = 0; i < data.length; i++) {
-      var cx = padL + slot * i + slot / 2;
-      var cy = baseY - (data[i][field] / maxVal) * innerH;
-      pts.push([cx, cy]);
+  function renderTasks() {
+    var pending = state.tasks.filter(function (t) { return !t.done; });
+    var done = state.tasks.filter(function (t) { return t.done; });
+
+    // 件数（グレー・「残り」を使わない淡々とした表記）
+    if (pending.length === 0) {
+      taskCount.innerHTML = "返信が必要なタスクはありません";
+    } else {
+      taskCount.innerHTML = "返信が必要な回数　<b>" + pending.length + "</b> 件";
     }
-    return pts;
+
+    pendingList.innerHTML = pending.map(function (t) {
+      return '<li class="task" data-id="' + t.id + '">' +
+        '<button class="check" data-act="complete" aria-label="完了にする">' + CHECK_SVG + '</button>' +
+        '<span class="ttext">' + escapeHtml(t.text) + '</span>' +
+        '<button class="del" data-act="delete" aria-label="削除">×</button>' +
+      '</li>';
+    }).join("");
+
+    taskEmpty.style.display = pending.length === 0 ? "block" : "none";
+
+    // 完了済み（新しい順）
+    var doneSorted = done.slice().reverse();
+    doneList.innerHTML = doneSorted.map(function (t) {
+      return '<li class="task done" data-id="' + t.id + '">' +
+        '<button class="check" data-act="reopen" aria-label="未完了に戻す">' + CHECK_SVG + '</button>' +
+        '<span class="ttext">' + escapeHtml(t.text) + '</span>' +
+        '<button class="del" data-act="delete" aria-label="削除">×</button>' +
+      '</li>';
+    }).join("");
+
+    doneHead.style.display = done.length ? "flex" : "none";
+    doneCountEl.textContent = done.length;
+    doneHead.classList.toggle("collapsed", doneCollapsed);
+    doneList.classList.toggle("collapsed", doneCollapsed);
   }
 
+  // ---- グラフ（折れ線） ----
   function pathFrom(pts) {
-    var dstr = "";
+    var d = "";
+    for (var i = 0; i < pts.length; i++) d += (i === 0 ? "M" : "L") + pts[i][0].toFixed(1) + "," + pts[i][1].toFixed(1) + " ";
+    return d.trim();
+  }
+  function buildLine(data, field, padL, slot, baseY, innerH, maxVal) {
+    var pts = [];
+    for (var i = 0; i < data.length; i++) pts.push([padL + slot * i + slot / 2, baseY - (data[i][field] / maxVal) * innerH]);
+    return pts;
+  }
+  function range1(max) { var a = []; for (var i = 0; i <= max; i++) a.push(i); return a; }
+  function drawSeries(pts, data, field, color) {
+    var s = '<path d="' + pathFrom(pts) + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
     for (var i = 0; i < pts.length; i++) {
-      dstr += (i === 0 ? "M" : "L") + pts[i][0].toFixed(1) + "," + pts[i][1].toFixed(1) + " ";
+      var val = data[i][field];
+      var r = val > 0 ? 4 : 2.5;
+      s += '<circle cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="' + r +
+           '" fill="#fff" stroke="' + color + '" stroke-width="2"><title>' + data[i].key + '｜' +
+           (field === "reply" ? "返信" : "我慢") + ' ' + val + '回</title></circle>';
     }
-    return dstr.trim();
+    return s;
   }
 
   function renderChart() {
     var data = lastNDays(rangeDays);
-    var anyData = state.reply.total > 0 || state.resist.total > 0;
-    if (!anyData) {
-      chartArea.innerHTML = '<div class="empty-note">まだ記録がありません。<br>ボタンを押すと、ここに折れ線が描かれていきます。</div>';
+    if (state.reply.total === 0 && state.resist.total === 0) {
+      chartArea.innerHTML = '<div class="empty-note">まだ記録がありません。<br>ボタンやタスク完了で、ここに折れ線が描かれていきます。</div>';
       return;
     }
 
-    var W = 660, H = 250;
-    var padL = 10, padR = 10, padTop = 18, padBottom = 26;
-    var innerW = W - padL - padR;
-    var innerH = H - padTop - padBottom;
-    var n = data.length;
-    var slot = innerW / n;
-    var baseY = padTop + innerH;
-
+    var W = 660, H = 250, padL = 12, padR = 10, padTop = 18, padBottom = 26;
+    var innerW = W - padL - padR, innerH = H - padTop - padBottom;
+    var n = data.length, slot = innerW / n, baseY = padTop + innerH;
     var maxVal = 1;
-    for (var i = 0; i < n; i++) { maxVal = Math.max(maxVal, data[i].reply, data[i].resist); }
-
+    for (var i = 0; i < n; i++) maxVal = Math.max(maxVal, data[i].reply, data[i].resist);
     var showEveryLabel = n <= 14;
 
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="返信できた回数と欲求を我慢した回数の折れ線グラフ">';
-
-    // 目盛り線（0 と 最大）
+    var svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="返信と我慢の1日ごとの回数の折れ線グラフ">';
     var gridVals = maxVal <= 4 ? range1(maxVal) : [0, Math.ceil(maxVal / 2), maxVal];
     for (var g = 0; g < gridVals.length; g++) {
-      var gv = gridVals[g];
-      var gy = baseY - (gv / maxVal) * innerH;
+      var gv = gridVals[g], gy = baseY - (gv / maxVal) * innerH;
       svg += '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + gy.toFixed(1) +
              '" stroke="' + (gv === 0 ? "#e2eaf3" : "#eef3f9") + '" stroke-width="1"/>';
-      svg += '<text x="' + (padL - 4) + '" y="' + (gy + 3).toFixed(1) + '" text-anchor="end" font-size="9" font-family="Noto Sans JP, sans-serif" fill="#93a3b3">' + gv + '</text>';
+      svg += '<text x="' + (padL - 5) + '" y="' + (gy + 3).toFixed(1) + '" text-anchor="end" font-size="9" font-family="Noto Sans JP, sans-serif" fill="#93a3b3">' + gv + '</text>';
     }
-
-    // 日付ラベル
     for (var j = 0; j < n; j++) {
       var cx = padL + slot * j + slot / 2;
       var drawLabel = showEveryLabel || j === 0 || j === n - 1 || (j % Math.ceil(n / 8) === 0);
@@ -405,32 +564,13 @@
         svg += '<text x="' + cx.toFixed(1) + '" y="' + (baseY + 16) + '" text-anchor="middle" font-size="10" font-family="Noto Sans JP, sans-serif" fill="#93a3b3">' + label + '</text>';
       }
     }
-
-    var replyPts = buildLine(data, "reply", W, padL, slot, baseY, innerH, maxVal);
-    var resistPts = buildLine(data, "resist", W, padL, slot, baseY, innerH, maxVal);
-
-    svg += drawSeries(resistPts, data, "resist", "#1fa88c");
-    svg += drawSeries(replyPts, data, "reply", "#3f83cf");
-
+    svg += drawSeries(buildLine(data, "resist", padL, slot, baseY, innerH, maxVal), data, "resist", "#1fa88c");
+    svg += drawSeries(buildLine(data, "reply", padL, slot, baseY, innerH, maxVal), data, "reply", "#3f83cf");
     svg += '</svg>';
     chartArea.innerHTML = svg;
   }
 
-  function range1(max) { var a = []; for (var i = 0; i <= max; i++) a.push(i); return a; }
-
-  function drawSeries(pts, data, field, color) {
-    var s = '<path d="' + pathFrom(pts) + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
-    for (var i = 0; i < pts.length; i++) {
-      var val = data[i][field];
-      var r = val > 0 ? 4 : 2.5;
-      s += '<circle cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="' + r +
-           '" fill="#fff" stroke="' + color + '" stroke-width="2">' +
-           '<title>' + data[i].key + '｜' + (field === "reply" ? "返信" : "我慢") + ' ' + val + '回</title></circle>';
-    }
-    return s;
-  }
-
-  function renderAll() { renderStats(); renderChart(); }
+  function renderAll() { renderStats(); renderTasks(); renderChart(); }
 
   // ---- インタラクション ----
   function wire(metric, btnId, floatId, undoId) {
@@ -438,19 +578,47 @@
     var flt = document.getElementById(floatId);
     var num = document.getElementById(metric + "Total");
     btn.addEventListener("click", function () {
-      addOne(metric);
-      renderAll();
+      addOne(metric); save(); renderAll();
       num.classList.remove("pop"); void num.offsetWidth; num.classList.add("pop");
       btn.classList.remove("flash"); void btn.offsetWidth; btn.classList.add("flash");
       flt.classList.remove("go"); void flt.offsetWidth; flt.classList.add("go");
       if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
     });
     document.getElementById(undoId).addEventListener("click", function () {
-      if (undoOne(metric)) { renderAll(); toast("直前の1回を取り消しました"); }
+      if (decOne(metric)) { save(); renderAll(); toast("直前の1回を取り消しました"); }
+      else toast("今日の記録がないため取り消せません");
     });
   }
   wire("reply", "replyBtn", "replyFloat", "replyUndo");
   wire("resist", "resistBtn", "resistFloat", "resistUndo");
+
+  // タスク追加
+  var taskInput = document.getElementById("taskInput");
+  function doAdd() { if (taskInput.value.trim()) { addTask(taskInput.value); taskInput.value = ""; renderAll(); taskInput.focus(); } }
+  document.getElementById("taskAddBtn").addEventListener("click", doAdd);
+  taskInput.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); doAdd(); } });
+
+  // タスク操作（イベント委譲）
+  function onListClick(e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    var li = e.target.closest(".task");
+    if (!li) return;
+    var id = li.getAttribute("data-id");
+    var act = b.getAttribute("data-act");
+    if (act === "complete") completeTask(id);
+    else if (act === "reopen") reopenTask(id);
+    else if (act === "delete") {
+      var t = findTask(id);
+      if (t && !t.done) { if (!confirm("このタスクを削除しますか？")) return; }
+      deleteTask(id);
+    }
+    renderAll();
+  }
+  pendingList.addEventListener("click", onListClick);
+  doneList.addEventListener("click", onListClick);
+
+  doneHead.addEventListener("click", function () { doneCollapsed = !doneCollapsed; renderTasks(); });
 
   document.getElementById("rangeBar").addEventListener("click", function (e) {
     var b = e.target.closest("button");
@@ -480,12 +648,11 @@
       try {
         var s = JSON.parse(reader.result);
         if (s && s.reply && s.resist) {
-          state = { reply: normMetric(s.reply), resist: normMetric(s.resist) };
-        } else if (s && typeof s.daily === "object") { // 旧形式（返信のみ）
-          state = { reply: normMetric(s), resist: emptyMetric() };
-        } else { throw new Error("bad"); }
-        save(); renderAll();
-        toast("データを読み込みました");
+          state = { reply: normMetric(s.reply), resist: normMetric(s.resist), tasks: Array.isArray(s.tasks) ? s.tasks : [] };
+        } else if (s && typeof s.daily === "object") {
+          state = { reply: normMetric(s), resist: emptyMetric(), tasks: [] };
+        } else throw new Error("bad");
+        save(); renderAll(); toast("データを読み込みました");
       } catch (e) { toast("読み込めませんでした（形式が不正です）"); }
       fileInput.value = "";
     };
@@ -493,10 +660,9 @@
   });
 
   document.getElementById("resetBtn").addEventListener("click", function () {
-    if (!confirm("すべての記録を消去します。よろしいですか？\n（先に「データを書き出す」でバックアップできます）")) return;
-    state = { reply: emptyMetric(), resist: emptyMetric() };
-    save(); renderAll();
-    toast("記録をリセットしました");
+    if (!confirm("すべての記録（カウント・タスク）を消去します。よろしいですか？\n（先に「データを書き出す」でバックアップできます）")) return;
+    state = { reply: emptyMetric(), resist: emptyMetric(), tasks: [] };
+    save(); renderAll(); toast("記録をリセットしました");
   });
 
   var toastEl = document.getElementById("toast");
